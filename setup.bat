@@ -18,11 +18,6 @@ New-Item HKLM:\SOFTWARE\Policies\Microsoft\Windows -Name WindowsUpdate
 New-Item HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate -Name AU
 New-ItemProperty HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU -Name NoAutoUpdate -Value 1
 
-# Remove Bloadwares
-Invoke-WebRequest "https://raw.githubusercontent.com/Sycnex/Windows10Debloater/master/Windows10SysPrepDebloater.ps1" -OutFile .\Windows10SysPrepDebloater.ps1
-Unblock-File .\Windows10SysPrepDebloater.ps1
-.\Windows10SysPrepDebloater.ps1 -Sysprep -Debloat -Privacy
-
 # Disable UAC
 Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name "ConsentPromptBehaviorAdmin" -Value 0
 Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name "PromptOnSecureDesktop" -Value 0
@@ -30,10 +25,13 @@ Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies
 
 # Disable Windows Defender
 Set-MpPreference -DisableRealtimeMonitoring $true -DisableScriptScanning $true -ExclusionPath $scripts
-Invoke-WebRequest "https://raw.githubusercontent.com/jeremybeaume/tools/master/disable-defender.ps1" -OutFile .\disable-defender.ps1
-$(Get-Content .\disable-defender.ps1) -replace "Read-Host","# Read-Host" | Out-File $scripts\disable-defender.ps1
-Unblock-File $scripts\disable-defender.ps1
-.\disable-defender.ps1
+Start-Sleep -Seconds 3.0
+Invoke-WebRequest "https://github.com/ionuttbara/windows-defender-remover/archive/refs/tags/release_def_12_8.zip" -OutFile .\windows-defender-remover.zip
+Expand-Archive -Path .\windows-defender-remover.zip
+$windows_defender_remover_path = $(Resolve-Path .\windows-defender-remover\*)
+$content = $(Get-Content $windows_defender_remover_path\Script_Run.bat) -replace "choice /C:yas /N","goto removedef" -replace "shutdown /r /f /t 0","exit"
+Out-File -Encoding utf8 -InputObject $content $windows_defender_remover_path\Script_Run.bat
+&"$windows_defender_remover_path\Script_Run.bat"
 
 # Make FLARE VM Installer
 Invoke-WebRequest "https://raw.githubusercontent.com/mandiant/flare-vm/main/install.ps1" -OutFile .\install.ps1
