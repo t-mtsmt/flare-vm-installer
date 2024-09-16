@@ -29,14 +29,14 @@ Unblock-File .\install.ps1
 
 $link = "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\flarevm-installer.lnk"
 $powershell_path = '"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"'
-$cmdargs = "-Command `"& {Start powershell -ArgumentList '-ExecutionPolicy Unrestricted \`"$workdir\install.ps1\`"' -Verb RunAs; Remove-Item  -Force `'$link`' -ErrorAction 'ignore'}`""
+$cmdargs = "-Command `"& {Start powershell -ArgumentList '-ExecutionPolicy Unrestricted \`"$scripts\install.ps1\`"' -Verb RunAs; Remove-Item  -Force `'$link`' -ErrorAction 'ignore'}`""
 
 $res = New-Item $(Split-Path -Path $link -Parent) -ItemType Directory -Force
 $WshShell = New-Object -comObject WScript.Shell
 $shortcut = $WshShell.CreateShortcut($link)
 $shortcut.TargetPath = $powershell_path
 $shortcut.Arguments = $cmdargs
-$shortcut.WorkingDirectory = $workdir
+$shortcut.WorkingDirectory = $scripts
 $shortcut.Save()
 
 # Disable Windows Defender
